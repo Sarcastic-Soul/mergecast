@@ -16,6 +16,8 @@ services:
         sync: false
       - key: GITHUB_TOKEN
         sync: false
+      - key: UV_PYTHON_DOWNLOADS     # Render sets this to "never"; let uv fetch 3.13 if needed
+        value: automatic
       - key: UV_PYTHON_INSTALL_DIR   # keep uv's Python inside the deployed folder
         value: /opt/render/project/src/.uv-python
       - key: ARROW_DEFAULT_MEMORY_POOL
