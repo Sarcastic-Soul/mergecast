@@ -7,3 +7,5 @@ data/*.log
 data/context.parquet
 data/context_pool.parquet
 .uv-python/
+design-options/
+.impeccable/

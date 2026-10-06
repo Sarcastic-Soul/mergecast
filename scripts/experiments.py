@@ -28,7 +28,7 @@ import pandas as pd
 from sklearn.metrics import log_loss, roc_auc_score
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from evaluate import CATEGORICAL, NUMERIC, PREDS, ROOT, TARGET, TEXT, feature_frame, load_env  # noqa: E402
+from evaluate import PREDS, ROOT, TARGET, feature_frame, load_env  # noqa: E402
 
 from mergecast.predict import outcome_class  # noqa: E402
 

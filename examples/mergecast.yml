@@ -1,4 +1,5 @@
-# Copy this into your own repo as .github/workflows/mergecast.yml
+# Copy this into your own repo as .github/workflows/mergecast.yml.
+# It lives outside .github/workflows here so it does not run on this repo.
 name: MergeCast
 on:
   pull_request_target:

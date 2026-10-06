@@ -9,7 +9,6 @@ The outcome is one of four classes, so a single call gives the whole picture:
 merged within a day, within a week, within 30 days, or not within 30 days.
 """
 
-import os
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from functools import lru_cache

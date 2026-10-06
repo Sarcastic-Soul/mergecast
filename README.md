@@ -175,7 +175,7 @@ the public can run on your key.
 ### As a GitHub Action
 
 Add your Prior Labs key as the `TABPFN_TOKEN` repository secret and copy
-[`.github/workflows/example.yml`](.github/workflows/example.yml) into your repo.
+[`examples/mergecast.yml`](examples/mergecast.yml) into your repo.
 Each new PR gets a forecast comment, which is updated in place if the
 workflow runs again. Here it is on a real PR in a small test repo,
 [mergecast-demo#3](https://github.com/Sarcastic-Soul/mergecast-demo/pull/3):
