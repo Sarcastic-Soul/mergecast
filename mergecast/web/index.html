@@ -311,7 +311,11 @@ function phrase(key) {
 function actual(pr) {
   if (pr.merged_at) {
     const days = (new Date(pr.merged_at) - new Date(pr.created_at)) / 864e5;
-    const when = days < 1 ? `${Math.max(1, Math.round(days * 24))} hours` : `${days.toFixed(1)} days`;
+    const hours = days * 24;
+    const plural = (n, unit) => `${n} ${unit}${n === 1 ? "" : "s"}`;
+    const when = hours < 1 ? plural(Math.max(1, Math.round(hours * 60)), "minute")
+      : days < 1 ? plural(Math.round(hours), "hour")
+      : `${days.toFixed(1)} days`;
     return `<b>Merged</b> after ${when}.`;
   }
   if (pr.state === "CLOSED") return "<b>Closed</b> without being merged.";

@@ -24,6 +24,10 @@ What might help (model associations, not guarantees):
    +0%  Link the issue it fixes
 ```
 
+**Try it live: [mergecast.onrender.com](https://mergecast.onrender.com)**. Paste any public PR
+URL. A fresh forecast takes about a minute; the first visit after a quiet spell
+can take another ~50 seconds while the free server wakes up.
+
 Built for the [Prior Labs TabPFN-3.5 Hackathon](https://platform.priorlabs.ai/hackathon-3.5).
 
 ![The MergeCast web demo](docs/web.png)
@@ -159,7 +163,7 @@ uv run mergecast <PR URL>          # terminal forecast
 uv run mergecast-web               # web demo at http://localhost:8000 (--port to change)
 ```
 
-### Deploy the web demo
+### Deploy your own web demo
 
 `render.yaml` deploys the demo to Render's free plan (512MB is enough: the
 server reads one repo's rows at a time instead of loading the whole table).
