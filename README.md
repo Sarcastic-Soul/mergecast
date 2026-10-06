@@ -24,7 +24,7 @@ What-ifs (model associations, not guarantees):
 ```
 
 **Try it live: [mergecast.onrender.com](https://mergecast.onrender.com)**. Paste any public PR
-URL. A fresh forecast takes about a minute; the first visit after a quiet spell
+URL. A fresh forecast takes one to two minutes; the first visit after a quiet spell
 can take another ~50 seconds while the free server wakes up.
 
 Built for the [Prior Labs TabPFN-3.5 Hackathon](https://platform.priorlabs.ai/hackathon-3.5).
