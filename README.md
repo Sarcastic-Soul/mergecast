@@ -90,9 +90,10 @@ mean AUC within each repo.
 
 ![Cold start](docs/coldstart.png)
 
-TabPFN-3.5 is ahead at every step and is already better with zero PRs from the
-new repo than LightGBM is with 800. Most of its gain comes from the first 25
-PRs; more history adds little after that.
+TabPFN-3.5 is ahead at every step. With zero PRs from the new repo it nearly
+matches LightGBM with 800 (0.815 vs 0.817), and with just 25 it beats it.
+Most of its gain comes from the first 25 PRs; more history adds little after
+that.
 
 **Does a bigger context help?** The live forecast puts the target repo's own
 past PRs into the context, plus a sample of PRs from the other repos. We
