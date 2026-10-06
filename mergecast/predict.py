@@ -157,7 +157,7 @@ def context_table(repo: str, live_hist: pd.DataFrame, now: pd.Timestamp,
     return pd.concat([other.sample(min(len(other), n_context), random_state=seed), own])
 
 
-def forecast(url: str, n_context: int = 3000, what_ifs: bool = True,
+def forecast(url: str, n_context: int = 5000, what_ifs: bool = True,
              model_path: str = "v3.5_default", progress=lambda step, detail="": None) -> Forecast:
     from tabpfn_client import TabPFNClassifier
 

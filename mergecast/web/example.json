@@ -1,41 +1,36 @@
 {
- "pr": {
-  "repo": "pola-rs/polars",
-  "number": 29748,
-  "title": "feat(rust): Implement `TryFrom<&Path>` and `TryFrom<PathBuf>` for `PlRefPath`",
-  "author": "richacode007-byte",
-  "created_at": "2026-10-05T16:32:33Z",
-  "state": "OPEN",
-  "merged_at": null,
-  "additions": 51,
-  "deletions": 1,
-  "changed_files": 1
- },
- "probs": {
-  "within 1 day": 0.2545,
-  "1-7 days": 0.5194,
-  "7-30 days": 0.0883,
-  "not within 30 days": 0.1377
- },
- "merge_prob": 0.862294614315033,
- "what_ifs": [
-  {
-   "change": "Add or update tests",
-   "merge_prob": 0.8935598358511925,
-   "delta": 0.031265221536159515
+  "pr": {
+    "repo": "pola-rs/polars",
+    "number": 29748,
+    "title": "feat(rust): Implement `TryFrom<&Path>` and `TryFrom<PathBuf>` for `PlRefPath`",
+    "author": "richacode007-byte",
+    "created_at": "2026-10-05T16:32:33Z",
+    "state": "OPEN",
+    "merged_at": null,
+    "additions": 51,
+    "deletions": 1,
+    "changed_files": 1
   },
-  {
-   "change": "Split it into a PR half the size",
-   "merge_prob": 0.8811537772417068,
-   "delta": 0.01885916292667389
+  "probs": {
+    "within 1 day": 0.2952,
+    "1-7 days": 0.4602,
+    "7-30 days": 0.1044,
+    "not within 30 days": 0.1402
   },
-  {
-   "change": "Link the issue it fixes",
-   "merge_prob": 0.8585549741983414,
-   "delta": -0.0037396401166915894
-  }
- ],
- "context_rows": 3732,
- "repo_rows": 757,
- "repo_seen_in_training": false
+  "merge_prob": 0.8597770482301712,
+  "what_ifs": [
+    {
+      "change": "Add or update tests",
+      "merge_prob": 0.8809942752122879,
+      "delta": 0.0212172269821167
+    },
+    {
+      "change": "Split it into a PR half the size",
+      "merge_prob": 0.8752820268273354,
+      "delta": 0.015504978597164154
+    }
+  ],
+  "context_rows": 5728,
+  "repo_rows": 758,
+  "repo_seen_in_training": false
 }

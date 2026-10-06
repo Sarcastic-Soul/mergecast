@@ -12,6 +12,10 @@
     "log_loss": 0.8922916461292641,
     "accuracy": 0.653
   },
+  "tabpfn_thinking": {
+    "log_loss": 0.893749602152178,
+    "accuracy": 0.6502
+  },
   "lgbm": {
     "log_loss": 0.9483299136449496,
     "accuracy": 0.628

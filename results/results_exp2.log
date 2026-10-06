@@ -1,0 +1,10 @@
+== timing
+  base_rate: log_loss=1.2216
+  tabpfn_plus: log_loss=0.8923, accuracy=0.6530
+  tabpfn_thinking: log_loss=0.8937, accuracy=0.6502
+  lgbm: log_loss=0.9483, accuracy=0.6280
+== context
+  N=  1000: roc_auc=0.8658, log_loss=0.4533, timing_log_loss=0.9142, mean_context_rows=1835.0571
+  N=  3000: roc_auc=0.8691, log_loss=0.4480, timing_log_loss=0.9054, mean_context_rows=3841.0571
+  N=  5000: roc_auc=0.8709, log_loss=0.4445, timing_log_loss=0.9009, mean_context_rows=5833.4571
+  N= 10000: roc_auc=0.8724, log_loss=0.4427, timing_log_loss=0.8954, mean_context_rows=10480.7714

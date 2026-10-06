@@ -2,26 +2,25 @@
 
 **Will this pull request get merged, and when?** MergeCast forecasts it for any
 public GitHub PR, using TabPFN-3.5 and nothing else: no model is trained ahead of
-time. Each forecast puts a few thousand past PRs, including the target repo's
+time. Each forecast puts about 6,000 past PRs, including the target repo's
 own recent history, into TabPFN-3.5's context and predicts in one call.
 
 ```
 $ uv run mergecast https://github.com/pola-rs/polars/pull/29748
 
 pola-rs/polars#29748  feat(rust): Implement `TryFrom<&Path>` and `TryFrom<PathBuf>` for `PlRefPath`
-context: 3732 PRs, 757 from this repo (repo not in training data)
+context: 5728 PRs, 758 from this repo (repo not in training data)
 
 Chance it merges within 30 days: 86%
 
-          within 1 day  ████████······················  25%
-              1-7 days  ████████████████··············  52%
-             7-30 days  ███···························  9%
+          within 1 day  █████████·····················  30%
+              1-7 days  ██████████████················  46%
+             7-30 days  ███···························  10%
     not within 30 days  ████··························  14%
 
 What-ifs (model associations, not guarantees):
-   +3%  Add or update tests
+   +2%  Add or update tests
    +2%  Split it into a PR half the size
-   +0%  Link the issue it fixes
 ```
 
 **Try it live: [mergecast.onrender.com](https://mergecast.onrender.com)**. Paste any public PR
@@ -77,6 +76,7 @@ within 30 days)
 | Base rate | 1.222 | |
 | LightGBM | 0.948 | 62.8% |
 | **TabPFN-3.5 Plus** | **0.892** | **65.3%** |
+| TabPFN-3.5 Thinking (`group_col="repo"`) | 0.894 | 65.0% |
 
 **A repo it has never seen.** Six repos (cpython, next.js, kubernetes, ollama,
 grafana, ruff) are removed from the data. Each model then gets 0 to 800 of that
@@ -94,12 +94,33 @@ TabPFN-3.5 is ahead at every step and is already better with zero PRs from the
 new repo than LightGBM is with 800. Most of its gain comes from the first 25
 PRs; more history adds little after that.
 
+**Does a bigger context help?** The live forecast puts the target repo's own
+past PRs into the context, plus a sample of PRs from the other repos. We
+changed the size of that sample and forecast each test repo with its own
+context (35 calls per size, same 5,000 test PRs as above).
+
+| PRs from other repos | 1,000 | 3,000 | 5,000 | 10,000 |
+|---|---|---|---|---|
+| Rows in context (average, with the repo's own) | 1,835 | 3,841 | 5,833 | 10,481 |
+| ROC AUC (will it merge) | 0.866 | 0.869 | 0.871 | 0.872 |
+| Log loss (will it merge) | 0.453 | 0.448 | 0.445 | 0.443 |
+| Log loss (when, 4 outcomes) | 0.914 | 0.905 | 0.901 | 0.895 |
+
+![Context size](docs/context.png)
+
+Every step up helps, but the gains get small: going from 3,000 to 10,000 adds
+0.003 AUC. The live demo now uses 5,000 (it was 3,000), which gets more than
+half of that gain for under a third of the extra rows (and wait). `--context 10000` gives the
+rest. These scores are a little lower than the 30K-row benchmark above,
+because each call here sees fewer rows.
+
 
 What we found, plainly:
 
 - TabPFN-3.5 Plus beats a LightGBM baseline that also gets the text (as TF-IDF)
   on every metric, with no tuning and no training step.
-- Thinking mode did not beat Plus here (AUC 0.871 vs 0.874). Our guess is that
+- Thinking mode did not beat Plus here, either on "will it merge" (AUC 0.871
+  vs 0.874) or on "when" (log loss 0.894 vs 0.892). Our guess is that
   the gain from grouping by repo is already captured by the `repo` column and
   the repo history features.
 - Text helps, but only a little: Plus with text columns scores AUC 0.872, and
@@ -192,7 +213,7 @@ already has tests, already links an issue, or is too small to split) are left ou
 uv run scripts/collect.py                 # ~45 min, GitHub GraphQL (optional, data ships in the repo)
 uv run scripts/prepare.py                 # raw PRs -> data/prs.parquet
 uv run scripts/evaluate.py --models lgbm lgbm_text plus thinking --max-train 60000 --max-test 5000
-uv run scripts/experiments.py coldstart text timing
+uv run scripts/experiments.py coldstart text timing context
 uv run scripts/stats.py                   # bootstrap ranges + calibration, no API tokens
 uv run scripts/charts.py
 ```
@@ -207,7 +228,11 @@ mergecast/github.py     live PR + repo history fetch (same sampling as training)
 mergecast/predict.py    in-context forecast + what-ifs
 mergecast/cli.py        `mergecast` command, also used by the Action
 mergecast/server.py     web demo (FastAPI, streams progress)
-scripts/                collect, prepare, evaluate, experiments, charts
+mergecast/web/          the web page
+action.yml              the GitHub Action (examples/mergecast.yml shows how to use it)
+render.yaml             Render deploy
+scripts/                collect, prepare, evaluate, experiments, stats, charts
+results/                metrics and logs behind every number in this README
 ```
 
 ## License

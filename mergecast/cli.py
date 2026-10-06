@@ -42,7 +42,7 @@ def markdown(f) -> str:
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("url")
-    ap.add_argument("--context", type=int, default=3000, help="training rows put in context")
+    ap.add_argument("--context", type=int, default=5000, help="PRs from other repos put in context")
     ap.add_argument("--no-what-ifs", action="store_true")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--markdown", action="store_true", help="PR comment format")

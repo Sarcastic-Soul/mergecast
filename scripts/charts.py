@@ -127,6 +127,31 @@ def calibration():
     f.savefig(DOCS / "calibration.png", facecolor=SURFACE)
 
 
+def context():
+    c = json.loads((RES / "context.json").read_text())
+    sizes = list(c)
+    f, axes = plt.subplots(1, 2, figsize=(9, 2.8), dpi=200)
+    f.patch.set_facecolor(SURFACE)
+    for ax, metric, title in [(axes[0], "roc_auc", "Will it merge: ROC AUC (higher is better)"),
+                              (axes[1], "timing_log_loss", "When: 4-outcome log loss (lower is better)")]:
+        style(ax)
+        ax.grid(axis="y", color=GRID, linewidth=0.8)
+        vals = [c[n][metric] for n in sizes]
+        ax.plot(range(len(sizes)), vals, color=TABPFN, linewidth=2, marker="o", markersize=5)
+        for i, v in enumerate(vals):
+            ax.text(i, v, f"{v:.3f}\n", ha="center", va="bottom", color=INK, fontsize=7)
+        ax.set_xticks(range(len(sizes)))
+        ax.set_xticklabels([f"{int(n):,}" for n in sizes], fontsize=8)
+        ax.set_xlim(-0.4, len(sizes) - 0.6)
+        pad = (max(vals) - min(vals)) * 0.45
+        ax.set_ylim(min(vals) - pad * 0.3, max(vals) + pad)
+        ax.set_xlabel("PRs from other repos in context", color=INK_2, fontsize=8)
+        ax.set_title(title, loc="left", color=INK, fontsize=9)
+        ax.tick_params(axis="y", labelsize=7)
+    f.tight_layout()
+    f.savefig(DOCS / "context.png", facecolor=SURFACE)
+
+
 def main():
     DOCS.mkdir(exist_ok=True)
     if (RES / "metrics.json").exists():
@@ -135,6 +160,8 @@ def main():
         coldstart()
     if (RES / "stats.json").exists():
         calibration()
+    if (RES / "context.json").exists():
+        context()
     print(sorted(p.name for p in DOCS.glob("*.png")))
 
 
