@@ -1,0 +1,105 @@
+"""Render README charts from results/*.json into docs/.
+
+Usage: uv run scripts/charts.py
+"""
+
+import json
+from pathlib import Path
+
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+
+ROOT = Path(__file__).resolve().parent.parent
+RES = ROOT / "results"
+DOCS = ROOT / "docs"
+
+SURFACE = "#fcfcfb"
+INK = "#1d1c1a"
+INK_2 = "#52514e"
+GRID = "#e4e2dd"
+TABPFN = "#2a78d6"   # categorical slot 1
+BASELINE = "#eb6834"  # categorical slot 2
+MUTED = "#a9a7a1"
+
+LABELS = {"lgbm": "LightGBM", "lgbm_text": "LightGBM + TF-IDF text",
+          "plus": "TabPFN-3.5 Plus", "thinking": "TabPFN-3.5 Thinking"}
+
+
+def style(ax):
+    ax.set_facecolor(SURFACE)
+    for s in ("top", "right", "left"):
+        ax.spines[s].set_visible(False)
+    ax.spines["bottom"].set_color(GRID)
+    ax.tick_params(colors=INK_2, length=0)
+    ax.grid(axis="x", color=GRID, linewidth=0.8)
+    ax.set_axisbelow(True)
+
+
+def fig(w, h):
+    f, ax = plt.subplots(figsize=(w, h), dpi=200)
+    f.patch.set_facecolor(SURFACE)
+    style(ax)
+    return f, ax
+
+
+def benchmark():
+    m = json.loads((RES / "metrics.json").read_text())
+    order = [k for k in ("lgbm", "lgbm_text", "plus", "thinking") if k in m]
+    f, axes = plt.subplots(1, 2, figsize=(9, 2.6), dpi=200)
+    f.patch.set_facecolor(SURFACE)
+    for ax, metric, title, better in [(axes[0], "roc_auc", "ROC AUC", "higher is better"),
+                                      (axes[1], "log_loss", "Log loss", "lower is better")]:
+        style(ax)
+        vals = [m[k][metric] for k in order]
+        colors = [TABPFN if k in ("plus", "thinking") else BASELINE for k in order]
+        y = range(len(order))[::-1]
+        # Dots, not bars: the axis doesn't start at zero, so bar length would mislead.
+        lo = min(vals) - (max(vals) - min(vals)) * 1.5 - 0.005
+        ax.hlines(list(y), lo, vals, color=GRID, linewidth=1)
+        ax.scatter(vals, list(y), color=colors, s=70, zorder=3)
+        ax.set_xlim(lo, max(vals) + (max(vals) - lo) * 0.18)
+        for yi, v in zip(y, vals):
+            ax.text(v, yi, f"   {v:.3f}", va="center", color=INK, fontsize=8)
+        ax.set_yticks(list(y))
+        ax.set_yticklabels([LABELS[k] for k in order] if ax is axes[0] else [], color=INK, fontsize=8)
+        ax.set_title(f"{title}  ({better})", loc="left", color=INK, fontsize=9)
+        ax.tick_params(axis="x", labelsize=7)
+    f.tight_layout()
+    f.savefig(DOCS / "benchmark.png", facecolor=SURFACE)
+
+
+def coldstart():
+    c = json.loads((RES / "coldstart.json").read_text())
+    shots = [int(k) for k in c["by_shots"]]
+    f, ax = fig(6.5, 3.2)
+    ax.grid(axis="y", color=GRID, linewidth=0.8)
+    for key, color, label in [("tabpfn_plus", TABPFN, "TabPFN-3.5 Plus"), ("lgbm", BASELINE, "LightGBM")]:
+        vals = [c["by_shots"][str(n)][key]["mean_repo_auc"] for n in shots]
+        x = range(len(shots))
+        ax.plot(list(x), vals, color=color, linewidth=2, marker="o", markersize=5)
+        ax.text(len(shots) - 1 + 0.08, vals[-1], label, color=INK, fontsize=8, va="center")
+    ax.set_xticks(range(len(shots)))
+    ax.set_xticklabels([str(n) for n in shots], fontsize=8)
+    ax.set_xlim(-0.2, len(shots) - 1 + 1.3)
+    ax.set_xlabel("PRs from the new repo in context / training", color=INK_2, fontsize=8)
+    ax.set_ylabel("Mean per-repo ROC AUC", color=INK_2, fontsize=8)
+    ax.set_title(f"Cold start on {len(c['heldout'])} repos never seen in training",
+                 loc="left", color=INK, fontsize=9)
+    ax.tick_params(axis="y", labelsize=7)
+    f.tight_layout()
+    f.savefig(DOCS / "coldstart.png", facecolor=SURFACE)
+
+
+def main():
+    DOCS.mkdir(exist_ok=True)
+    if (RES / "metrics.json").exists():
+        benchmark()
+    if (RES / "coldstart.json").exists():
+        coldstart()
+    print(sorted(p.name for p in DOCS.glob("*.png")))
+
+
+if __name__ == "__main__":
+    main()

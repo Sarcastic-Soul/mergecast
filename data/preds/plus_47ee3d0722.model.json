@@ -1,0 +1,33 @@
+{
+  "tabpfn_client_version": "0.6.1",
+  "task": "classification",
+  "model_id": "01a10ff9-9ca8-7681-9c92-54554a27bb28",
+  "params": {
+    "api_mode": "auto",
+    "average_before_softmax": null,
+    "balance_probabilities": false,
+    "categorical_features_indices": null,
+    "fit_mode": null,
+    "group_col": null,
+    "group_time_col": null,
+    "ignore_pretraining_limits": false,
+    "inference_config": null,
+    "inference_precision": null,
+    "model_path": "v3.5_default",
+    "n_estimators": null,
+    "paper_version": false,
+    "random_state": 0,
+    "softmax_temperature": null,
+    "text_handling": "advanced",
+    "thinking_effort": null,
+    "thinking_metric": null,
+    "thinking_mode": false,
+    "thinking_timeout_s": null,
+    "time_col": null
+  },
+  "n_train_rows": 29717,
+  "classes": [
+    0,
+    1
+  ]
+}

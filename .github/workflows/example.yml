@@ -1,0 +1,15 @@
+# Copy this into your own repo as .github/workflows/mergecast.yml
+name: MergeCast
+on:
+  pull_request_target:
+    types: [opened, ready_for_review]
+permissions:
+  pull-requests: write
+  contents: read
+jobs:
+  forecast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Sarcastic-Soul/mergecast@main
+        with:
+          tabpfn-token: ${{ secrets.TABPFN_TOKEN }}

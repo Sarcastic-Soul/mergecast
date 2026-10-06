@@ -1,0 +1,30 @@
+name: MergeCast
+description: Forecast whether and when a pull request gets merged, with TabPFN-3.5, and post it as a PR comment.
+branding:
+  icon: git-pull-request
+  color: orange
+inputs:
+  tabpfn-token:
+    description: Prior Labs API key (store it as a repository secret).
+    required: true
+  github-token:
+    description: Token used to read PR history and post the comment.
+    default: ${{ github.token }}
+runs:
+  using: composite
+  steps:
+    - uses: astral-sh/setup-uv@v6
+    - name: Forecast
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      env:
+        TABPFN_TOKEN: ${{ inputs.tabpfn-token }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        PR_URL: ${{ github.event.pull_request.html_url }}
+      run: uv run --frozen mergecast "$PR_URL" --markdown > "$RUNNER_TEMP/mergecast.md"
+    - name: Comment
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_URL: ${{ github.event.pull_request.html_url }}
+      run: gh pr comment "$PR_URL" --body-file "$RUNNER_TEMP/mergecast.md" --edit-last --create-if-none

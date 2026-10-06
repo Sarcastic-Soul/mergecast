@@ -1,0 +1,19 @@
+{
+  "class_share_test": [
+    1490,
+    804,
+    415,
+    2291
+  ],
+  "base_rate": {
+    "log_loss": 1.2216254322921225
+  },
+  "tabpfn_plus": {
+    "log_loss": 0.8922916461292641,
+    "accuracy": 0.653
+  },
+  "lgbm": {
+    "log_loss": 0.9483299136449496,
+    "accuracy": 0.628
+  }
+}

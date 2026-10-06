@@ -1,0 +1,6 @@
+data/raw/
+.venv/
+__pycache__/
+.env
+*.json.fit
+data/*.log

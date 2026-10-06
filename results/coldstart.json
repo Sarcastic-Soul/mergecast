@@ -1,0 +1,154 @@
+{
+  "heldout": [
+    "python/cpython",
+    "vercel/next.js",
+    "kubernetes/kubernetes",
+    "ollama/ollama",
+    "grafana/grafana",
+    "astral-sh/ruff"
+  ],
+  "test_rows": 2400,
+  "context_rows_other": 20000,
+  "by_shots": {
+    "0": {
+      "tabpfn_plus": {
+        "roc_auc": 0.8547501284686536,
+        "log_loss": 0.4716301138495591,
+        "mean_repo_auc": 0.815437437164371,
+        "per_repo_auc": {
+          "astral-sh/ruff": 0.7232360097323601,
+          "grafana/grafana": 0.8126666666666666,
+          "kubernetes/kubernetes": 0.7750533049040512,
+          "ollama/ollama": 0.9623902597637197,
+          "python/cpython": 0.7906430688855625,
+          "vercel/next.js": 0.828635313033866
+        }
+      },
+      "lgbm": {
+        "roc_auc": 0.8419388712632377,
+        "log_loss": 0.500006375593974,
+        "mean_repo_auc": 0.798153325747967,
+        "per_repo_auc": {
+          "astral-sh/ruff": 0.6920403197775461,
+          "grafana/grafana": 0.7629,
+          "kubernetes/kubernetes": 0.7866681629446751,
+          "ollama/ollama": 0.9673037320712453,
+          "python/cpython": 0.7791083325995716,
+          "vercel/next.js": 0.8008994070947644
+        }
+      }
+    },
+    "25": {
+      "tabpfn_plus": {
+        "roc_auc": 0.8548918629071899,
+        "log_loss": 0.46928154673713085,
+        "mean_repo_auc": 0.8287566015837147,
+        "per_repo_auc": {
+          "astral-sh/ruff": 0.7655833622986908,
+          "grafana/grafana": 0.8125000000000001,
+          "kubernetes/kubernetes": 0.7875939849624061,
+          "ollama/ollama": 0.9618122041981285,
+          "python/cpython": 0.8056118106307417,
+          "vercel/next.js": 0.8394382474123204
+        }
+      },
+      "lgbm": {
+        "roc_auc": 0.8199260467402476,
+        "log_loss": 0.5313047677140368,
+        "mean_repo_auc": 0.7999855762461184,
+        "per_repo_auc": {
+          "astral-sh/ruff": 0.6909686015525431,
+          "grafana/grafana": 0.7848333333333334,
+          "kubernetes/kubernetes": 0.7843676355066771,
+          "ollama/ollama": 0.9587412840059251,
+          "python/cpython": 0.7931672096504357,
+          "vercel/next.js": 0.7878353934277962
+        }
+      }
+    },
+    "100": {
+      "tabpfn_plus": {
+        "roc_auc": 0.8662822847312213,
+        "log_loss": 0.4504268053963449,
+        "mean_repo_auc": 0.8286821853085374,
+        "per_repo_auc": {
+          "astral-sh/ruff": 0.7611516626115167,
+          "grafana/grafana": 0.8001333333333334,
+          "kubernetes/kubernetes": 0.7952250028055213,
+          "ollama/ollama": 0.9630767007478593,
+          "python/cpython": 0.8109829473746,
+          "vercel/next.js": 0.8415234649783941
+        }
+      },
+      "lgbm": {
+        "roc_auc": 0.8421888265784888,
+        "log_loss": 0.4907150966373484,
+        "mean_repo_auc": 0.8041876688507594,
+        "per_repo_auc": {
+          "astral-sh/ruff": 0.7397462634688913,
+          "grafana/grafana": 0.7610666666666667,
+          "kubernetes/kubernetes": 0.7865278868813825,
+          "ollama/ollama": 0.9601502944470538,
+          "python/cpython": 0.7922866954301312,
+          "vercel/next.js": 0.785348206210431
+        }
+      }
+    },
+    "400": {
+      "tabpfn_plus": {
+        "roc_auc": 0.8693634378211716,
+        "log_loss": 0.44132986936850216,
+        "mean_repo_auc": 0.8320124157642977,
+        "per_repo_auc": {
+          "astral-sh/ruff": 0.7563723786351524,
+          "grafana/grafana": 0.8125000000000001,
+          "kubernetes/kubernetes": 0.8014813152283693,
+          "ollama/ollama": 0.963763141731999,
+          "python/cpython": 0.8045258430923659,
+          "vercel/next.js": 0.8534318158978996
+        }
+      },
+      "lgbm": {
+        "roc_auc": 0.8458990571517941,
+        "log_loss": 0.4793549819727017,
+        "mean_repo_auc": 0.8075544618326504,
+        "per_repo_auc": {
+          "astral-sh/ruff": 0.7137933032093615,
+          "grafana/grafana": 0.7768666666666667,
+          "kubernetes/kubernetes": 0.7904275614409157,
+          "ollama/ollama": 0.9567542179992052,
+          "python/cpython": 0.7889994423409938,
+          "vercel/next.js": 0.81848557933876
+        }
+      }
+    },
+    "800": {
+      "tabpfn_plus": {
+        "roc_auc": 0.8668080287322937,
+        "log_loss": 0.4443771228252097,
+        "mean_repo_auc": 0.8307242439640067,
+        "per_repo_auc": {
+          "astral-sh/ruff": 0.7654095701540957,
+          "grafana/grafana": 0.8222666666666666,
+          "kubernetes/kubernetes": 0.8023510268207833,
+          "ollama/ollama": 0.958813540951624,
+          "python/cpython": 0.7852132311936839,
+          "vercel/next.js": 0.8502914279971863
+        }
+      },
+      "lgbm": {
+        "roc_auc": 0.8562016846150409,
+        "log_loss": 0.47061140047776956,
+        "mean_repo_auc": 0.8172273888756464,
+        "per_repo_auc": {
+          "astral-sh/ruff": 0.7413393581276793,
+          "grafana/grafana": 0.8041999999999999,
+          "kubernetes/kubernetes": 0.787257322410504,
+          "ollama/ollama": 0.9594277249900647,
+          "python/cpython": 0.7978045845440404,
+          "vercel/next.js": 0.8133353431815898
+        }
+      }
+    }
+  }
+}

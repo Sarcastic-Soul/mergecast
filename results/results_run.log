@@ -1,0 +1,9 @@
+train 29717 (0.56 merged), test 5000 (0.54 merged), 35 repos
+running lgbm
+  lgbm: roc_auc=0.8596, log_loss=0.4662, brier=0.1514
+running lgbm_text
+  lgbm_text: roc_auc=0.8632, log_loss=0.4588, brier=0.1488
+running plus
+  plus: roc_auc=0.8742, log_loss=0.4399, brier=0.1419
+running thinking
+  thinking: roc_auc=0.8711, log_loss=0.4505, brier=0.1449

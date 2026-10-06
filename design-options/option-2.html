@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MergeCast — Departures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<style>
+  :root {
+    --bg: #181714;
+    --panel: #201f1b;
+    --tile: #2a2823;
+    --line: #36332d;
+    --text: #ebe5d6;
+    --dim: #a39a88;
+    --faint: #8d8576;
+    --accent: #f0a73a;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+    --grot: "Space Grotesk", "Helvetica Neue", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: var(--mono); font-size: 14px; line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 32px 40px; }
+
+  /* Top bar */
+  .top {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 18px 0; border-bottom: 1px solid var(--line);
+  }
+  .brand { font-family: var(--grot); font-weight: 700; font-size: 22px; letter-spacing: -.01em; display: flex; align-items: center; gap: 10px; }
+  .brand i { color: var(--accent); font-size: 24px; }
+  .top .meta { color: var(--dim); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; display: flex; gap: 18px; }
+  .top .meta b { color: var(--text); font-weight: 500; }
+
+  /* Search */
+  .search { display: grid; grid-template-columns: 140px 1fr auto; border: 1px solid var(--line); margin: 22px 0 26px; background: var(--panel); }
+  .search label { padding: 14px 16px; color: var(--dim); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; border-right: 1px solid var(--line); display: flex; align-items: center; }
+  .search input {
+    min-width: 0; width: 100%; background: transparent; border: 0; color: var(--text);
+    font: 500 15px var(--mono); padding: 14px 16px; outline: none;
+  }
+  .search:focus-within { border-color: var(--accent); }
+  .search button {
+    background: var(--accent); color: #1b1710; border: 0; font: 700 13px var(--mono); text-transform: uppercase; letter-spacing: .06em;
+    padding: 0 22px; cursor: pointer; display: flex; align-items: center; gap: 8px;
+  }
+  .search button:hover { background: #f7bb5f; }
+  .search button:focus-visible { outline: 2px solid var(--text); outline-offset: -4px; }
+
+  /* Headline row */
+  .head { display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: stretch; padding-bottom: 26px; border-bottom: 1px solid var(--line); }
+  .flaps-block .cap { font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 10px; }
+  .flaps { display: flex; gap: 6px; }
+  .flap {
+    position: relative; width: 104px; height: 140px; background: var(--tile);
+    display: grid; place-items: center; font-family: var(--mono); font-weight: 700; font-size: 104px; color: var(--accent);
+    border-radius: 4px; line-height: 1;
+  }
+  .flap::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: var(--bg); }
+  .flap.unit { width: 72px; font-size: 64px; color: var(--text); }
+  .flaps-block .sub { margin-top: 12px; font-family: var(--grot); font-size: 18px; font-weight: 500; }
+  .flaps-block .sub span { color: var(--accent); }
+
+  .ticket { display: grid; grid-template-columns: 120px 1fr; align-content: start; border-top: 1px solid var(--line); }
+  .ticket dt, .ticket dd { margin: 0; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .ticket dt { color: var(--faint); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; padding-top: 12px; }
+  .ticket dd { font-size: 14px; overflow-wrap: anywhere; }
+  .ticket dd.title { font-family: var(--grot); font-size: 20px; font-weight: 500; line-height: 1.25; }
+  .ticket dd.title code { font-family: var(--mono); font-size: .82em; color: var(--accent); }
+  .ticket .ok { display: inline-flex; align-items: center; gap: 6px; }
+  .ticket .ok i { color: var(--accent); }
+
+  /* Board */
+  .section-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 30px 0 12px; }
+  .section-title h2 { font-family: var(--grot); font-size: 22px; font-weight: 600; margin: 0; }
+  .section-title span { font-size: 12px; color: var(--dim); }
+  .board { width: 100%; border-collapse: collapse; }
+  .board th { text-align: left; font-weight: 500; font-size: 11px; color: var(--faint); text-transform: uppercase; letter-spacing: .1em; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+  .board td { padding: 14px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; font-size: 15px; }
+  .board tr.likely td { background: #2a2418; }
+  .board tr.likely td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+  .board .window { font-weight: 700; text-transform: uppercase; white-space: nowrap; }
+  .board .pct { font-weight: 700; font-size: 22px; text-align: right; width: 80px; font-variant-numeric: tabular-nums; }
+  .board tr.likely .pct { color: var(--accent); }
+  .board .bar { width: 46%; }
+  .seg { display: grid; grid-template-columns: repeat(20, 1fr); gap: 3px; height: 18px; }
+  .seg i { background: var(--tile); }
+  .seg i.on { background: var(--text); }
+  tr.likely .seg i.on { background: var(--accent); }
+  tr.miss .seg i.on { background: transparent; border: 1px solid var(--dim); }
+  .board .cum { color: var(--dim); font-size: 13px; white-space: nowrap; }
+  .board .status { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; color: var(--dim); }
+  .board tr.likely .status { color: var(--accent); font-weight: 700; }
+
+  .track { margin-top: 18px; }
+  .track .line { display: flex; height: 10px; gap: 2px; }
+  .track .line div { background: var(--text); }
+  .track .line .likely { background: var(--accent); }
+  .track .line .miss { background: transparent; border: 1px solid var(--dim); }
+  .track .ticks { position: relative; height: 16px; font-size: 11px; color: var(--dim); margin-top: 6px; }
+  .track .ticks span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+  .track .ticks span:first-child { transform: none; }
+  .track .ticks span:last-child { transform: translateX(-100%); }
+
+  /* Lower */
+  .lower { display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; margin-top: 8px; }
+  .changes td { padding: 12px; }
+  .changes .act { font-family: var(--grot); font-size: 17px; font-weight: 500; }
+  .changes .act i { color: var(--dim); font-size: 18px; vertical-align: -3px; margin-right: 10px; }
+  .changes .d { text-align: right; font-weight: 700; font-size: 18px; width: 70px; }
+  .changes .d.pos { color: var(--accent); }
+  .changes .d.zero { color: var(--dim); }
+  .changes .to { color: var(--dim); font-size: 13px; text-align: right; width: 120px; white-space: nowrap; }
+  .foot { font-size: 12px; color: var(--dim); margin: 12px 0 0; display: flex; gap: 8px; }
+  .foot i { margin-top: 2px; }
+
+  .how p { margin: 0 0 12px; color: var(--dim); font-size: 13px; }
+  .how .nums { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--line); }
+  .how .nums div { padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .how .nums b { display: block; font-size: 28px; font-weight: 700; }
+  .how .nums span { font-size: 12px; color: var(--dim); }
+
+  .ticker {
+    margin-top: 32px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    padding: 10px 0; font-size: 12px; color: var(--dim); display: flex; flex-wrap: wrap; gap: 6px 22px;
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+  .ticker b { color: var(--text); font-weight: 500; }
+  .ticker .hi { color: var(--accent); }
+
+  @media (max-width: 900px) {
+    .wrap { padding: 0 16px 32px; }
+    .head { grid-template-columns: 1fr; gap: 22px; }
+    .lower { grid-template-columns: 1fr; gap: 10px; }
+    .top .meta span:first-child { display: none; }
+  }
+  @media (max-width: 600px) {
+    .search { grid-template-columns: 1fr auto; }
+    .search label { grid-column: 1 / -1; border-right: 0; border-bottom: 1px solid var(--line); padding: 8px 12px; }
+    .search input { font-size: 13px; padding: 12px; }
+    .search button { padding: 0 14px; }
+    .flap { width: 80px; height: 108px; font-size: 80px; }
+    .flap.unit { width: 56px; font-size: 48px; }
+    .ticket { grid-template-columns: 82px 1fr; }
+    .ticket dd.title { font-size: 17px; }
+    .board .cum, .board th.cum-h, .board .status, .board th.status-h { display: none; }
+    .board td, .board th { padding-left: 8px; padding-right: 8px; }
+    .board .window { font-size: 12px; white-space: normal; }
+    .board .pct { font-size: 18px; width: 52px; }
+    .board .bar { width: 44%; }
+    .seg { gap: 1px; height: 14px; }
+    .track .ticks span:last-child { display: none; }
+    .changes .to { display: none; }
+    .changes .act { font-size: 15px; }
+    .top .meta { display: none; }
+    .section-title { flex-direction: column; gap: 2px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><i class="ph ph-git-merge"></i>MergeCast</div>
+    <div class="meta"><span>Board for <b>pola-rs/polars</b></span><span>Model <b>TabPFN-3.5</b></span><span><b>06 Oct 2026</b></span></div>
+  </header>
+
+  <form class="search" onsubmit="return false">
+    <label for="pr">GitHub PR URL</label>
+    <input id="pr" type="url" value="https://github.com/pola-rs/polars/pull/29748" placeholder="Paste a GitHub PR URL" spellcheck="false">
+    <button type="submit">Forecast <i class="ph ph-arrow-right"></i></button>
+  </form>
+
+  <section class="head">
+    <div class="flaps-block">
+      <div class="cap">Chance of merge</div>
+      <div class="flaps" role="img" aria-label="88 percent">
+        <div class="flap">8</div><div class="flap">8</div><div class="flap unit">%</div>
+      </div>
+      <div class="sub">within <span>30 days</span></div>
+    </div>
+    <dl class="ticket">
+      <dt>PR</dt><dd>pola-rs/polars #29748</dd>
+      <dt>Title</dt><dd class="title">feat(rust): Implement <code>TryFrom&lt;&amp;Path&gt;</code> and <code>TryFrom&lt;PathBuf&gt;</code> for <code>PlRefPath</code></dd>
+      <dt>Context</dt><dd>3,732 past PRs &middot; 757 from this repo</dd>
+      <dt>Training</dt><dd class="ok"><i class="ph ph-check"></i>None. Repo not in training data.</dd>
+    </dl>
+  </section>
+
+  <div class="section-title">
+    <h2>Arrival windows</h2>
+    <span>Each row is one of four outcomes. Rows add to 100%.</span>
+  </div>
+  <table class="board">
+    <thead><tr><th>Merged</th><th class="pct-h" style="text-align:right">Chance</th><th></th><th class="cum-h">By then</th><th class="status-h">Status</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="window">Within 1 day</td><td class="pct">28%</td>
+        <td class="bar"><div class="seg"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></td>
+        <td class="cum">28% merged</td><td class="status">Possible</td>
+      </tr>
+      <tr class="likely">
+        <td class="window">1&ndash;7 days</td><td class="pct">50%</td>
+        <td class="bar"><div class="seg"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></td>
+        <td class="cum">78% merged</td><td class="status">Most likely</td>
+      </tr>
+      <tr>
+        <td class="window">7&ndash;30 days</td><td class="pct">10%</td>
+        <td class="bar"><div class="seg"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></td>
+        <td class="cum">88% merged</td><td class="status">Late</td>
+      </tr>
+      <tr class="miss">
+        <td class="window">Not within 30 days</td><td class="pct">12%</td>
+        <td class="bar"><div class="seg"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></td>
+        <td class="cum">&mdash;</td><td class="status">Delayed</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="track" aria-hidden="true">
+    <div class="line"><div style="flex:28"></div><div class="likely" style="flex:50"></div><div style="flex:10"></div><div class="miss" style="flex:12"></div></div>
+    <div class="ticks"><span style="left:0">open</span><span style="left:28%">1d</span><span style="left:78%">7d</span><span style="left:88%">30d</span><span style="left:100%">later</span></div>
+  </div>
+
+  <section class="lower">
+    <div>
+      <div class="section-title"><h2>If you change the PR</h2><span>Shift in the 30-day chance</span></div>
+      <table class="board changes">
+        <tr><td class="act"><i class="ph ph-test-tube"></i>Add or update tests</td><td class="d pos">+5%</td><td class="to">88% &rarr; 93%</td></tr>
+        <tr><td class="act"><i class="ph ph-scissors"></i>Split it into a PR half the size</td><td class="d pos">+1%</td><td class="to">88% &rarr; 89%</td></tr>
+        <tr><td class="act"><i class="ph ph-link"></i>Link the issue it fixes</td><td class="d zero">+0%</td><td class="to">no change</td></tr>
+      </table>
+      <p class="foot"><i class="ph ph-info"></i><span>These are associations the model learned from past PRs, not causes. A change here is not a promise of a faster merge.</span></p>
+    </div>
+    <div class="how">
+      <div class="section-title"><h2>Where the number comes from</h2></div>
+      <p>TabPFN-3.5 reads past PRs as context and forecasts in one pass. No training on pola-rs/polars; it adapts from the repo's own recent history.</p>
+      <div class="nums">
+        <div><b>3,732</b><span>past PRs in context</span></div>
+        <div><b>757</b><span>from pola-rs/polars</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="ticker">
+    <span><b>Benchmark</b></span>
+    <span>5,000 held-out PRs</span>
+    <span>Jul&ndash;Aug 2026</span>
+    <span>34 repos</span>
+    <span>AUC TabPFN-3.5 <b class="hi">0.863</b></span>
+    <span>LightGBM <b>0.853</b></span>
+    <span>No tuning</span>
+  </div>
+</div>
+</body>
+</html>

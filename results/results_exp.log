@@ -1,0 +1,14 @@
+== text
+  with_text: AUC 0.8720  log loss 0.4428
+  without_text: AUC 0.8699  log loss 0.4461
+== timing
+  base_rate: log_loss=1.2216
+  tabpfn_plus: log_loss=0.8923, accuracy=0.6530
+  lgbm: log_loss=0.9483, accuracy=0.6280
+== coldstart
+  hist = df[df.repo.isin(HELDOUT) & (df.created_at < CUTOFF - pd.Timedelta(days=30))]
+  N=   0  tabpfn AUC 0.8548 (per-repo 0.8154)  lgbm AUC 0.8419 (per-repo 0.7982)
+  N=  25  tabpfn AUC 0.8549 (per-repo 0.8288)  lgbm AUC 0.8199 (per-repo 0.8000)
+  N= 100  tabpfn AUC 0.8663 (per-repo 0.8287)  lgbm AUC 0.8422 (per-repo 0.8042)
+  N= 400  tabpfn AUC 0.8694 (per-repo 0.8320)  lgbm AUC 0.8459 (per-repo 0.8076)
+  N= 800  tabpfn AUC 0.8668 (per-repo 0.8307)  lgbm AUC 0.8562 (per-repo 0.8172)

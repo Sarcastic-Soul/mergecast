@@ -1,0 +1,41 @@
+{
+ "pr": {
+  "repo": "pola-rs/polars",
+  "number": 29748,
+  "title": "feat(rust): Implement `TryFrom<&Path>` and `TryFrom<PathBuf>` for `PlRefPath`",
+  "author": "richacode007-byte",
+  "created_at": "2026-10-05T16:32:33Z",
+  "state": "OPEN",
+  "merged_at": null,
+  "additions": 51,
+  "deletions": 1,
+  "changed_files": 1
+ },
+ "probs": {
+  "within 1 day": 0.2805,
+  "1-7 days": 0.4957,
+  "7-30 days": 0.1017,
+  "not within 30 days": 0.1221
+ },
+ "merge_prob": 0.8779028654098511,
+ "what_ifs": [
+  {
+   "change": "Add or update tests",
+   "merge_prob": 0.9266153126955032,
+   "delta": 0.04871244728565216
+  },
+  {
+   "change": "Split it into a PR half the size",
+   "merge_prob": 0.8906629383563995,
+   "delta": 0.012760072946548462
+  },
+  {
+   "change": "Link the issue it fixes",
+   "merge_prob": 0.8796541765332222,
+   "delta": 0.0017513111233711243
+  }
+ ],
+ "context_rows": 3732,
+ "repo_rows": 757,
+ "repo_seen_in_training": false
+}
