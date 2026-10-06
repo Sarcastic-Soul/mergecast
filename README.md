@@ -45,6 +45,26 @@ repos (29,717 training rows). Nothing was tuned for any model.
 
 ![Benchmark](docs/benchmark.png)
 
+**How sure are we?** We resampled the 5,000 test PRs 2,000 times (paired, so
+every model sees the same resample) to get 95% ranges:
+
+| Model | ROC AUC (95% range) | Log loss (95% range) |
+|---|---|---|
+| LightGBM | 0.860 (0.849-0.870) | 0.466 (0.449-0.483) |
+| LightGBM + TF-IDF text | 0.863 (0.853-0.874) | 0.459 (0.442-0.476) |
+| **TabPFN-3.5 Plus** | **0.874 (0.864-0.884)** | **0.440 (0.425-0.455)** |
+| TabPFN-3.5 Thinking | 0.871 (0.861-0.881) | 0.451 (0.433-0.470) |
+
+The ranges overlap, but the paired comparison is what counts: Plus beats
+LightGBM + text by +0.011 AUC (95% range +0.007 to +0.015) and has lower log
+loss in every one of the 2,000 resamples.
+
+**Can you trust the percentages?** When TabPFN-3.5 says 70%, about 70% of
+those PRs merge. Its average calibration error (ECE) is 0.015, against 0.023
+for LightGBM + text and 0.030 for Thinking.
+
+![Calibration](docs/calibration.png)
+
 **When will it merge?** (4 outcomes: within 1 day / 1-7 days / 7-30 days / not
 within 30 days)
 
@@ -152,6 +172,7 @@ uv run scripts/collect.py                 # ~45 min, GitHub GraphQL (optional, d
 uv run scripts/prepare.py                 # raw PRs -> data/prs.parquet
 uv run scripts/evaluate.py --models lgbm lgbm_text plus thinking --max-train 60000 --max-test 5000
 uv run scripts/experiments.py coldstart text timing
+uv run scripts/stats.py                   # bootstrap ranges + calibration, no API tokens
 uv run scripts/charts.py
 ```
 

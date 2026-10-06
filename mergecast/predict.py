@@ -12,6 +12,7 @@ merged within a day, within a week, within 30 days, or not within 30 days.
 import os
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -87,10 +88,24 @@ class Forecast:
     repo_seen_in_training: bool = False
 
 
+@lru_cache(maxsize=1)
+def training_table() -> pd.DataFrame:
+    """The shipped feature table, loaded once with only the columns we use."""
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    cols = FEATURES + ["number", "created_at", "merged_30d", "hours_to_merge"]
+    # Arrow-backed strings keep the text columns small (the web demo runs in 512MB).
+    arrow_str = pd.StringDtype("pyarrow")
+    return pq.read_table(TABLE, columns=cols).to_pandas(
+        types_mapper={pa.string(): arrow_str, pa.large_string(): arrow_str}.get,
+        self_destruct=True, split_blocks=True)
+
+
 def context_table(repo: str, live_hist: pd.DataFrame, now: pd.Timestamp,
                   n_context: int, seed=0) -> pd.DataFrame:
     """Training rows + this repo's settled live history, all with known labels."""
-    base = pd.read_parquet(TABLE)
+    base = training_table()
     base = base[base.created_at < now - HORIZON]
     other = base[base.repo != repo]
     per_repo = max(20, n_context // max(1, other.repo.nunique()))
@@ -136,7 +151,7 @@ def forecast(url: str, n_context: int = 3000, what_ifs: bool = True,
     merge_prob = float(1 - P[0][3])
     wi = [{"change": name, "merge_prob": float(1 - p[3]), "delta": float((1 - p[3]) - merge_prob)}
           for name, p in zip(WHAT_IFS, P[1:])]
-    seen = bool((pd.read_parquet(TABLE, columns=["repo"]).repo == pr["repo"]).any())
+    seen = bool((training_table().repo == pr["repo"]).any())
     return Forecast(pr=pr, probs=probs, merge_prob=merge_prob,
                     what_ifs=sorted(wi, key=lambda w: -w["delta"]),
                     context_rows=len(ctx), repo_rows=int((ctx.repo == pr["repo"]).sum()),
