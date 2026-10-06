@@ -20,6 +20,11 @@ def bar(p, width=30):
     return "█" * n + "·" * (width - n)
 
 
+def signed(d) -> str:
+    n = round(d * 100)
+    return f"{'+' if n >= 0 else '-'}{abs(n)}%"
+
+
 def markdown(f) -> str:
     lines = [f"### MergeCast: {f.merge_prob:.0%} chance this merges within 30 days", "",
              "| Outcome | Chance |", "|---|---|"]
@@ -27,7 +32,7 @@ def markdown(f) -> str:
               for k, p in f.probs.items()]
     if f.what_ifs:
         lines += ["", "**What might help** (model associations, not guarantees):"]
-        lines += [f"- {w['change']}: {w['delta']:+.0%}" for w in f.what_ifs]
+        lines += [f"- {w['change']}: {signed(w['delta'])}" for w in f.what_ifs]
     lines += ["", f"<sub>Forecast by TabPFN-3.5 from {f.context_rows} past PRs in context "
               f"({f.repo_rows} from this repo), no training. "
               "[MergeCast](https://github.com/Sarcastic-Soul/mergecast)</sub>"]
@@ -64,7 +69,7 @@ def main():
     if f.what_ifs:
         print("\nWhat might help (model associations, not guarantees):")
         for w in f.what_ifs:
-            print(f"  {w['delta']:+.0%}  {w['change']}")
+            print(f"  {signed(w['delta']):>4}  {w['change']}")
     print()
 
 

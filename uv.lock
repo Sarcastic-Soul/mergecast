@@ -447,8 +447,6 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },
-    { name = "lightgbm" },
-    { name = "matplotlib" },
     { name = "pandas" },
     { name = "pyarrow" },
     { name = "requests" },
@@ -457,17 +455,27 @@ dependencies = [
     { name = "uvicorn" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "lightgbm" },
+    { name = "matplotlib" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.142.2" },
-    { name = "lightgbm", specifier = ">=4.7.0" },
-    { name = "matplotlib", specifier = ">=3.11.2" },
     { name = "pandas", specifier = "<=2.3.3" },
     { name = "pyarrow", specifier = ">=25.0.1" },
     { name = "requests", specifier = ">=2.34.2" },
     { name = "scikit-learn", specifier = "<=1.9.0" },
     { name = "tabpfn-client", specifier = ">=0.6" },
     { name = "uvicorn", specifier = ">=0.54.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "lightgbm", specifier = ">=4.7.0" },
+    { name = "matplotlib", specifier = ">=3.11.2" },
 ]
 
 [[package]]

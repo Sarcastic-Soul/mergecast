@@ -12,27 +12,27 @@
   "changed_files": 1
  },
  "probs": {
-  "within 1 day": 0.2805,
-  "1-7 days": 0.4957,
-  "7-30 days": 0.1017,
-  "not within 30 days": 0.1221
+  "within 1 day": 0.2545,
+  "1-7 days": 0.5194,
+  "7-30 days": 0.0883,
+  "not within 30 days": 0.1377
  },
- "merge_prob": 0.8779028654098511,
+ "merge_prob": 0.862294614315033,
  "what_ifs": [
   {
    "change": "Add or update tests",
-   "merge_prob": 0.9266153126955032,
-   "delta": 0.04871244728565216
+   "merge_prob": 0.8935598358511925,
+   "delta": 0.031265221536159515
   },
   {
    "change": "Split it into a PR half the size",
-   "merge_prob": 0.8906629383563995,
-   "delta": 0.012760072946548462
+   "merge_prob": 0.8811537772417068,
+   "delta": 0.01885916292667389
   },
   {
    "change": "Link the issue it fixes",
-   "merge_prob": 0.8796541765332222,
-   "delta": 0.0017513111233711243
+   "merge_prob": 0.8585549741983414,
+   "delta": -0.0037396401166915894
   }
  ],
  "context_rows": 3732,

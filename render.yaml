@@ -1,0 +1,28 @@
+# Render blueprint for the public web demo (free plan, 512MB).
+# Secrets (TABPFN_TOKEN, GITHUB_TOKEN) are entered in the Render dashboard.
+services:
+  - type: web
+    name: mergecast
+    runtime: python
+    plan: free
+    buildCommand: >-
+      pip install uv &&
+      uv sync --frozen --no-dev &&
+      uv run --frozen --no-dev python -c "from mergecast.predict import build_context_file; build_context_file()"
+    startCommand: uv run --frozen --no-dev mergecast-web --host 0.0.0.0 --port $PORT
+    healthCheckPath: /healthz
+    envVars:
+      - key: TABPFN_TOKEN
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: UV_PYTHON_INSTALL_DIR   # keep uv's Python inside the deployed folder
+        value: /opt/render/project/src/.uv-python
+      - key: ARROW_DEFAULT_MEMORY_POOL
+        value: system
+      - key: MERGECAST_CACHE
+        value: /tmp/mergecast
+      - key: MERGECAST_DAILY_CAP
+        value: "300"
+      - key: MERGECAST_PER_VISITOR
+        value: "6"

@@ -64,10 +64,20 @@ class GitHub:
 
     def gql(self, query, variables, retries=4):
         for attempt in range(retries):
-            r = self.session.post("https://api.github.com/graphql",
-                                  json={"query": query, "variables": variables}, timeout=60)
+            try:
+                r = self.session.post("https://api.github.com/graphql",
+                                      json={"query": query, "variables": variables}, timeout=60)
+            except requests.RequestException:
+                if attempt == retries - 1:
+                    raise
+                time.sleep(2 * (attempt + 1))
+                continue
             if r.status_code == 200:
-                data = r.json()
+                try:
+                    data = r.json()
+                except ValueError:  # GitHub sometimes sends an empty 200
+                    time.sleep(2 * (attempt + 1))
+                    continue
                 if data.get("errors") and not data.get("data"):
                     raise RuntimeError(data["errors"][0]["message"])
                 return data["data"]
@@ -76,6 +86,7 @@ class GitHub:
             else:
                 time.sleep(2 * (attempt + 1))
         r.raise_for_status()
+        raise RuntimeError("GitHub returned an empty response; try again.")
 
     def pull_request(self, url: str) -> dict:
         m = PR_URL_RE.search(url)

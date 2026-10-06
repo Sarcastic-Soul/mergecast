@@ -88,31 +88,66 @@ class Forecast:
     repo_seen_in_training: bool = False
 
 
-@lru_cache(maxsize=1)
-def training_table() -> pd.DataFrame:
-    """The shipped feature table, loaded once with only the columns we use."""
+CONTEXT_FILE = ROOT / "data" / "context.parquet"
+POOL_FILE = ROOT / "data" / "context_pool.parquet"
+COLUMNS = FEATURES + ["number", "created_at", "merged_30d", "hours_to_merge"]
+POOL_PER_REPO = 400
+
+
+def build_context_file() -> Path:
+    """Copy of the training table sorted by repo in small row groups, so one
+    repo's rows can be read without loading the whole table (the web demo
+    runs in 512MB)."""
+    import pyarrow.parquet as pq
+
+    table = pq.read_table(TABLE, columns=COLUMNS).sort_by("repo")
+    pq.write_table(table, CONTEXT_FILE, row_group_size=500)
+    # A fixed random sample of every repo, for the "other repos" part of the context.
+    df = table.to_pandas()
+    pool = df.groupby("repo", group_keys=False).apply(
+        lambda g: g.sample(min(len(g), POOL_PER_REPO), random_state=0))
+    pool.to_parquet(POOL_FILE, index=False)
+    return CONTEXT_FILE
+
+
+def _read(filters=None, columns=COLUMNS, path=CONTEXT_FILE) -> pd.DataFrame:
     import pyarrow as pa
     import pyarrow.parquet as pq
 
-    cols = FEATURES + ["number", "created_at", "merged_30d", "hours_to_merge"]
-    # Arrow-backed strings keep the text columns small (the web demo runs in 512MB).
+    if not (CONTEXT_FILE.exists() and POOL_FILE.exists()):
+        build_context_file()
     arrow_str = pd.StringDtype("pyarrow")
-    return pq.read_table(TABLE, columns=cols).to_pandas(
-        types_mapper={pa.string(): arrow_str, pa.large_string(): arrow_str}.get,
-        self_destruct=True, split_blocks=True)
+    return pq.read_table(path, columns=columns, filters=filters).to_pandas(
+        types_mapper={pa.string(): arrow_str, pa.large_string(): arrow_str}.get)
+
+
+@lru_cache(maxsize=1)
+def known_repos() -> frozenset:
+    return frozenset(_read(columns=["repo"]).repo.unique())
+
+
+def repo_rows(repo: str) -> pd.DataFrame:
+    return _read(filters=[("repo", "==", repo)])
+
+
+@lru_cache(maxsize=1)
+def others_pool() -> pd.DataFrame:
+    return _read(path=POOL_FILE)
 
 
 def context_table(repo: str, live_hist: pd.DataFrame, now: pd.Timestamp,
                   n_context: int, seed=0) -> pd.DataFrame:
     """Training rows + this repo's settled live history, all with known labels."""
-    base = training_table()
-    base = base[base.created_at < now - HORIZON]
-    other = base[base.repo != repo]
+    cutoff = now - HORIZON
+    other = others_pool()
+    other = other[(other.repo != repo) & (other.created_at < cutoff)]
     per_repo = max(20, n_context // max(1, other.repo.nunique()))
     other = other.groupby("repo", group_keys=False).apply(
         lambda g: g.sample(min(len(g), per_repo), random_state=seed))
-    settled = live_hist[(live_hist.created_at < now - HORIZON) | (live_hist.merged_30d == 1)]
-    own = pd.concat([base[base.repo == repo], settled]).drop_duplicates(["repo", "number"])
+    own = repo_rows(repo) if repo in known_repos() else live_hist.iloc[:0]
+    own = own[own.created_at < cutoff]
+    settled = live_hist[(live_hist.created_at < cutoff) | (live_hist.merged_30d == 1)]
+    own = pd.concat([own, settled]).drop_duplicates(["repo", "number"])
     return pd.concat([other.sample(min(len(other), n_context), random_state=seed), own])
 
 
@@ -151,7 +186,7 @@ def forecast(url: str, n_context: int = 3000, what_ifs: bool = True,
     merge_prob = float(1 - P[0][3])
     wi = [{"change": name, "merge_prob": float(1 - p[3]), "delta": float((1 - p[3]) - merge_prob)}
           for name, p in zip(WHAT_IFS, P[1:])]
-    seen = bool((training_table().repo == pr["repo"]).any())
+    seen = pr["repo"] in known_repos()
     return Forecast(pr=pr, probs=probs, merge_prob=merge_prob,
                     what_ifs=sorted(wi, key=lambda w: -w["delta"]),
                     context_rows=len(ctx), repo_rows=int((ctx.repo == pr["repo"]).sum()),

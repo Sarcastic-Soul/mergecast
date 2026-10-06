@@ -11,17 +11,17 @@ $ uv run mergecast https://github.com/pola-rs/polars/pull/29748
 pola-rs/polars#29748  feat(rust): Implement `TryFrom<&Path>` and `TryFrom<PathBuf>` for `PlRefPath`
 context: 3732 PRs, 757 from this repo (repo not in training data)
 
-Chance it merges within 30 days: 88%
+Chance it merges within 30 days: 86%
 
-          within 1 day  ████████······················  28%
-              1-7 days  ███████████████···············  50%
-             7-30 days  ███···························  10%
-    not within 30 days  ████··························  12%
+          within 1 day  ████████······················  25%
+              1-7 days  ████████████████··············  52%
+             7-30 days  ███···························  9%
+    not within 30 days  ████··························  14%
 
 What might help (model associations, not guarantees):
-  +5%  Add or update tests
-  +1%  Split it into a PR half the size
-  +0%  Link the issue it fixes
+   +3%  Add or update tests
+   +2%  Split it into a PR half the size
+   +0%  Link the issue it fixes
 ```
 
 Built for the [Prior Labs TabPFN-3.5 Hackathon](https://platform.priorlabs.ai/hackathon-3.5).
@@ -158,6 +158,15 @@ gh auth login        # or set GITHUB_TOKEN
 uv run mergecast <PR URL>          # terminal forecast
 uv run mergecast-web               # web demo at http://localhost:8000 (--port to change)
 ```
+
+### Deploy the web demo
+
+`render.yaml` deploys the demo to Render's free plan (512MB is enough: the
+server reads one repo's rows at a time instead of loading the whole table).
+Create a Blueprint from this repo and fill in `TABPFN_TOKEN` and a read-only
+`GITHUB_TOKEN`. Forecasts are cached per PR for 6 hours, and
+`MERGECAST_DAILY_CAP` / `MERGECAST_PER_VISITOR` limit how many fresh forecasts
+the public can run on your key.
 
 ### As a GitHub Action
 

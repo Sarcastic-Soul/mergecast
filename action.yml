@@ -21,7 +21,7 @@ runs:
         TABPFN_TOKEN: ${{ inputs.tabpfn-token }}
         GITHUB_TOKEN: ${{ inputs.github-token }}
         PR_URL: ${{ github.event.pull_request.html_url }}
-      run: uv run --frozen mergecast "$PR_URL" --markdown > "$RUNNER_TEMP/mergecast.md"
+      run: uv run --frozen --no-dev mergecast "$PR_URL" --markdown > "$RUNNER_TEMP/mergecast.md"
     - name: Comment
       shell: bash
       env:

@@ -4,14 +4,19 @@ version = "0.1.0"
 requires-python = ">=3.12,<3.14"
 dependencies = [
     "fastapi>=0.142.2",
-    "lightgbm>=4.7.0",
-    "matplotlib>=3.11.2",
     "pandas<=2.3.3",
     "pyarrow>=25.0.1",
     "requests>=2.34.2",
     "scikit-learn<=1.9.0",
     "tabpfn-client>=0.6",
     "uvicorn>=0.54.0",
+]
+
+[dependency-groups]
+# Only needed for the experiments and charts, not for forecasts or the web demo.
+dev = [
+    "lightgbm>=4.7.0",
+    "matplotlib>=3.11.2",
 ]
 
 [project.scripts]
