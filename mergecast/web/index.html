@@ -362,7 +362,7 @@ function renderOutlook(f) {
 
 function renderWhatIfs(f) {
   if (!f.what_ifs?.length) {
-    $("whatifs").innerHTML = '<p class="empty">No what-ifs for this forecast.</p>';
+    $("whatifs").innerHTML = '<p class="empty">This PR already links an issue, touches tests and is small, so there is nothing to suggest.</p>';
     return;
   }
   const base = f.merge_prob * 100;

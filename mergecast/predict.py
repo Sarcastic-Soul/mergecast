@@ -69,6 +69,13 @@ WHAT_IFS = {
         log_churn=np.log1p((r["additions"] + r["deletions"]) // 2)),
 }
 
+# Skip a what-if when the PR already does it (or is too small to split).
+ALREADY_DONE = {
+    "Link the issue it fixes": lambda r: bool(r["links_issue"]),
+    "Add or update tests": lambda r: bool(r["touches_tests"]),
+    "Split it into a PR half the size": lambda r: r["additions"] + r["deletions"] < 40,
+}
+
 
 def apply_edit(row: pd.Series, edit) -> pd.Series:
     row = row.copy()
@@ -104,8 +111,8 @@ def build_context_file() -> Path:
     pq.write_table(table, CONTEXT_FILE, row_group_size=500)
     # A fixed random sample of every repo, for the "other repos" part of the context.
     df = table.to_pandas()
-    pool = df.groupby("repo", group_keys=False).apply(
-        lambda g: g.sample(min(len(g), POOL_PER_REPO), random_state=0))
+    pool = pd.concat([g.sample(min(len(g), POOL_PER_REPO), random_state=0)
+                      for _, g in df.groupby("repo")])
     pool.to_parquet(POOL_FILE, index=False)
     return CONTEXT_FILE
 
@@ -142,8 +149,8 @@ def context_table(repo: str, live_hist: pd.DataFrame, now: pd.Timestamp,
     other = others_pool()
     other = other[(other.repo != repo) & (other.created_at < cutoff)]
     per_repo = max(20, n_context // max(1, other.repo.nunique()))
-    other = other.groupby("repo", group_keys=False).apply(
-        lambda g: g.sample(min(len(g), per_repo), random_state=seed))
+    other = pd.concat([g.sample(min(len(g), per_repo), random_state=seed)
+                       for _, g in other.groupby("repo")])
     own = repo_rows(repo) if repo in known_repos() else live_hist.iloc[:0]
     own = own[own.created_at < cutoff]
     settled = live_hist[(live_hist.created_at < cutoff) | (live_hist.merged_30d == 1)]
@@ -171,7 +178,8 @@ def forecast(url: str, n_context: int = 3000, what_ifs: bool = True,
     ctx = context_table(pr["repo"], live_hist, now, n_context)
     progress("context", f"{len(ctx)} PRs in context, {int((ctx.repo == pr['repo']).sum())} from this repo")
     base = target.iloc[0]
-    rows = [base] + ([apply_edit(base, f) for f in WHAT_IFS.values()] if what_ifs else [])
+    edits = {k: f for k, f in WHAT_IFS.items() if not ALREADY_DONE[k](base)} if what_ifs else {}
+    rows = [base] + [apply_edit(base, f) for f in edits.values()]
     X_test = pd.DataFrame(rows)
 
     # Encode context and test rows together so categories line up.
@@ -185,7 +193,7 @@ def forecast(url: str, n_context: int = 3000, what_ifs: bool = True,
     probs = dict(zip(OUTCOMES, P[0].round(4).tolist()))
     merge_prob = float(1 - P[0][3])
     wi = [{"change": name, "merge_prob": float(1 - p[3]), "delta": float((1 - p[3]) - merge_prob)}
-          for name, p in zip(WHAT_IFS, P[1:])]
+          for name, p in zip(edits, P[1:])]
     seen = pr["repo"] in known_repos()
     return Forecast(pr=pr, probs=probs, merge_prob=merge_prob,
                     what_ifs=sorted(wi, key=lambda w: -w["delta"]),
