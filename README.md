@@ -176,7 +176,15 @@ the public can run on your key.
 
 Add your Prior Labs key as the `TABPFN_TOKEN` repository secret and copy
 [`.github/workflows/example.yml`](.github/workflows/example.yml) into your repo.
-Each new PR gets a forecast comment.
+Each new PR gets a forecast comment, which is updated in place if the
+workflow runs again. Here it is on a real PR in a small test repo,
+[mergecast-demo#3](https://github.com/Sarcastic-Soul/mergecast-demo/pull/3):
+
+![MergeCast comment on a pull request](docs/action-comment.png)
+
+The demo repo has no past PRs, so TabPFN-3.5 relies on PRs from the 35
+other repos in its context. What-ifs the PR already does (it
+already has tests, already links an issue, or is too small to split) are left out.
 
 ### Reproduce the results
 
