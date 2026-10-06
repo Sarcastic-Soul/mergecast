@@ -6,11 +6,15 @@
              in-context learning adapts to a repo it has never seen.
   text       Plus with and without the free-text columns (title, body, paths).
   timing     The 4-way outcome (merged <1 day, 1-7 days, 7-30 days, not in
-             30 days), scored with multi-class log loss.
+             30 days), scored with multi-class log loss. Plus and Thinking.
+  context    How big the context should be for live forecasts. Each repo's
+             test PRs are predicted the way the live tool does it: all of the
+             repo's own earlier PRs plus an even sample of N PRs from the
+             other repos.
 
 Results land in results/<experiment>.json. TabPFN calls are cached in data/preds/.
 
-Usage: uv run scripts/experiments.py coldstart text timing
+Usage: uv run scripts/experiments.py coldstart text timing context
 """
 
 import argparse
@@ -35,8 +39,14 @@ SHOTS = [0, 25, 100, 400, 800]
 OUT = ROOT / "results"
 
 
-def cached_tabpfn(tag, train, test, y, text=True, classes=False):
-    """Fit Plus on train, predict test; cache by tag + row ids."""
+THINKING = dict(thinking_mode=True, thinking_metric="log_loss", thinking_effort="high",
+                group_col="repo", group_time_col="created_ts")
+CONTEXT_SIZES = [1000, 3000, 5000, 10000]
+
+
+def cached_tabpfn(tag, train, test, y, text=True, classes=False, **cfg):
+    """Fit TabPFN-3.5 (Plus unless cfg says otherwise) on train, predict test;
+    cache by tag + row ids."""
     from tabpfn_client import TabPFNClassifier
     ids = ",".join(train.repo + "#" + train.number.astype(str)) + "|" + \
           ",".join(test.repo + "#" + test.number.astype(str))
@@ -45,7 +55,7 @@ def cached_tabpfn(tag, train, test, y, text=True, classes=False):
         return np.load(path)
     both = feature_frame(pd.concat([train, test], ignore_index=True), text=text)
     Xtr, Xte = both.iloc[:len(train)], both.iloc[len(train):]
-    clf = TabPFNClassifier(model_path="v3.5_default")
+    clf = TabPFNClassifier(model_path="v3.5_default", **cfg)
     clf.fit(Xtr, y)
     P = clf.predict_proba(Xte)
     P = P if classes else P[:, 1]
@@ -119,25 +129,58 @@ def timing(df):
     prior = np.bincount(ytr, minlength=4) / len(ytr)
     out["base_rate"] = {"log_loss": log_loss(yte, np.tile(prior, (len(yte), 1)), labels=range(4))}
     for name, fn in [("tabpfn_plus", lambda: cached_tabpfn("timing", train, test, ytr, classes=True)),
+                     ("tabpfn_thinking", lambda: cached_tabpfn("timing_thinking", train, test, ytr,
+                                                               classes=True, **THINKING)),
                      ("lgbm", lambda: lgbm(train, test, ytr, classes=True))]:
         P = fn()
         out[name] = {"log_loss": log_loss(yte, P, labels=range(4)),
                      "accuracy": float((P.argmax(1) == yte).mean())}
-    for k in ("base_rate", "tabpfn_plus", "lgbm"):
+    for k in ("base_rate", "tabpfn_plus", "tabpfn_thinking", "lgbm"):
         print(f"  {k}: " + ", ".join(f"{m}={v:.4f}" for m, v in out[k].items()))
+    return out
+
+
+def context_size(df):
+    from concurrent.futures import ThreadPoolExecutor
+    train, test = split(df)
+    yte = outcome_class(test).values
+    out = {}
+    for n in CONTEXT_SIZES:
+        def one(repo):
+            own = train[train.repo == repo]
+            other = train[train.repo != repo]
+            per_repo = max(20, n // other.repo.nunique())
+            other = other.groupby("repo", group_keys=False).apply(
+                lambda g: g.sample(min(len(g), per_repo), random_state=0))
+            other = other.sample(min(len(other), n), random_state=0)
+            ctx = pd.concat([other, own])
+            rows = test[test.repo == repo]
+            P = cached_tabpfn(f"context{n}", ctx, rows, outcome_class(ctx).values, classes=True)
+            return rows.index, P, len(ctx)
+        with ThreadPoolExecutor(4) as pool:
+            parts = list(pool.map(one, sorted(test.repo.unique())))
+        P = pd.DataFrame(np.vstack([p for _, p, _ in parts]),
+                         index=np.concatenate([i for i, _, _ in parts])).loc[test.index].values
+        merge = 1 - P[:, 3]
+        out[str(n)] = {"roc_auc": roc_auc_score(test[TARGET], merge),
+                       "log_loss": log_loss(test[TARGET], np.clip(merge, 1e-6, 1 - 1e-6)),
+                       "timing_log_loss": log_loss(yte, P, labels=range(4)),
+                       "mean_context_rows": float(np.mean([c for _, _, c in parts]))}
+        print(f"  N={n:>6}: " + ", ".join(f"{m}={v:.4f}" for m, v in out[str(n)].items()))
     return out
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("experiments", nargs="+", choices=["coldstart", "text", "timing"])
+    ap.add_argument("experiments", nargs="+", choices=["coldstart", "text", "timing", "context"])
     args = ap.parse_args()
     load_env()
     df = pd.read_parquet(ROOT / "data" / "prs.parquet")
     OUT.mkdir(exist_ok=True)
     for name in args.experiments:
         print(f"== {name}")
-        res = {"coldstart": coldstart, "text": text_ablation, "timing": timing}[name](df)
+        res = {"coldstart": coldstart, "text": text_ablation, "timing": timing,
+               "context": context_size}[name](df)
         (OUT / f"{name}.json").write_text(json.dumps(res, indent=2, default=float))
 
 

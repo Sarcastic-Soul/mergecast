@@ -18,7 +18,7 @@ Chance it merges within 30 days: 86%
              7-30 days  ███···························  9%
     not within 30 days  ████··························  14%
 
-What might help (model associations, not guarantees):
+What-ifs (model associations, not guarantees):
    +3%  Add or update tests
    +2%  Split it into a PR half the size
    +0%  Link the issue it fixes

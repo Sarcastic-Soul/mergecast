@@ -31,7 +31,7 @@ def markdown(f) -> str:
     lines += [f"| Merged {k} | {p:.0%} |" if k != "not within 30 days" else f"| Not merged {k[4:]} | {p:.0%} |"
               for k, p in f.probs.items()]
     if f.what_ifs:
-        lines += ["", "**What might help** (model associations, not guarantees):"]
+        lines += ["", "**What-ifs** (model associations, not guarantees):"]
         lines += [f"- {w['change']}: {signed(w['delta'])}" for w in f.what_ifs]
     lines += ["", f"<sub>Forecast by TabPFN-3.5 from {f.context_rows} past PRs in context "
               f"({f.repo_rows} from this repo), no training. "
@@ -67,7 +67,7 @@ def main():
     for k, p in f.probs.items():
         print(f"  {k:>20}  {bar(p)}  {p:.0%}")
     if f.what_ifs:
-        print("\nWhat might help (model associations, not guarantees):")
+        print("\nWhat-ifs (model associations, not guarantees):")
         for w in f.what_ifs:
             print(f"  {signed(w['delta']):>4}  {w['change']}")
     print()
