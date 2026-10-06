@@ -1,10 +1,10 @@
 # Pings the free Render demo so it doesn't fall asleep (Render sleeps after
-# 15 idle minutes). GitHub may start scheduled runs late, hence every 5 minutes.
+# 15 idle minutes). Runs every 10 minutes; GitHub may start some runs late.
 name: keep demo awake
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/10 * * * *"
   workflow_dispatch:
 
 permissions: {}
